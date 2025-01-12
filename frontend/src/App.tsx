@@ -17,12 +17,12 @@ interface AuthRouteProps {
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { userInfo } = useAppStore();
   const isAuthenticated = !!userInfo;
-  return isAuthenticated ? <>{children}</> : <Navigate to="/auth" />;
+  return isAuthenticated ? children : <Navigate to="/auth" />;
 };
 const AuthRoute: React.FC<AuthRouteProps> = ({ children }) => {
   const { userInfo } = useAppStore();
   const isAuthenticated = !!userInfo;
-  return isAuthenticated ? <Navigate to="/chat" /> : <>{children}</>;
+  return isAuthenticated ? <Navigate to="/chat" /> : children;
 };
 
 // ---> for using in javascript
@@ -34,7 +34,10 @@ const AuthRoute: React.FC<AuthRouteProps> = ({ children }) => {
 
 function App() {
 
-  const {userInfo, setUserInfo} = useAppStore();
+  const { userInfo, setUserInfo } = useAppStore();
+
+  // const { userInfo, setUserInfo } = useAppStore<undefined>();
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,9 +46,17 @@ function App() {
         const response = await apiClient.get(GET_USER_INFO, {
           withCredentials: true
         })
+        if(response.status === 200 && response.data.id){
+          setUserInfo(response.data);
+        } else {
+          setUserInfo(undefined)
+        }
         console.log({response})
       } catch (error) {
+        setUserInfo(undefined)
         console.log({error})
+      } finally{
+        setLoading(false);
       }
     };
 

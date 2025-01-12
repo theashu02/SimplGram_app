@@ -80,12 +80,25 @@ export const login = async (request, response, next) => {
   }
 };
 
-
 export const getUserInfo = async (request, response, next) => {
   try {
-    
+    // console.log(request.userId);
+    const userData = await User.findById(request.userId);
+    if (!userData) {
+      return response.status(404).send("User with the given id not found.");
+    }
+
+    return response.status(200).json({
+      id: userData.id,
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      image: userData.image,
+      profileSetup: userData.profileSetup,
+      color: userData.color,
+    });
   } catch (error) {
-    console.log({error})
-    return response.status(500).send("Internal server Error: " + error.message)
+    console.log({ error });
+    return response.status(500).send("Internal server Error: " + error.message);
   }
-}
+};
