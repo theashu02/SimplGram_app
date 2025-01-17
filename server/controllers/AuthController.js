@@ -163,32 +163,28 @@ export const addProfileImage = async (request, response, next) => {
 export const removeProfileImage = async (request, response, next) => {
   try {
     const { userId } = request;
-    const { firstName, lastName, color } = request.body;
-    if (!firstName || !lastName) {
-      return response
-        .status(400)
-        .send("Firsname lastname and color is required");
-    }
-    const userData = await User.findByIdAndUpdate(
-      userId,
-      {
-        firstName,
-        lastName,
-        color,
-        profileSetup: true,
-      },
-      { new: true, runValidators: true }
-    );
+    const user = await User.findById(userId);
 
-    return response.status(200).json({
-      id: userData.id,
-      email: userData.email,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      image: userData.image,
-      profileSetup: userData.profileSetup,
-      color: userData.color,
-    });
+    if(!user){
+      return response.status(404).send("User not found.");
+    }
+    if(user.image){
+      unlinkSync(user.image);
+    }
+    user.image = null;
+    await user.save();
+
+    return response.status(200).send("Profile image removed successfully.")
+  } catch (error) {
+    console.log({ error });
+    return response.status(500).send("Internal server Error: " + error.message);
+  }
+};
+
+export const logout = async (request, response, next) => {
+  try {
+    response.cookie("jwt", "", {maxAge: 1, secure: true, sameSite: "None"})
+    return response.status(200).send("Logout successfully.")
   } catch (error) {
     console.log({ error });
     return response.status(500).send("Internal server Error: " + error.message);

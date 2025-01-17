@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import apiClient from "../../lib/api-client";
 import { HOST, UPDATE_PROFILE_ROUTE } from "../../utils/constants";
 import { ADD_PROFILE_IMAGE_ROUTE } from "../../utils/constants";
+import { REMOVE_PROFILE_IMAGE_ROUTE } from "../../utils/constants";
 import { ChangeEvent } from "react";
 
 export default function Profile() {
@@ -111,7 +112,21 @@ export default function Profile() {
     }
   };
 
-  const handleDeleteImage = async () => {};
+  const handleDeleteImage = async () => {
+    try {
+      const response = await apiClient.delete(REMOVE_PROFILE_IMAGE_ROUTE, {
+        withCredentials: true,
+      });
+      if (response.status === 200) {
+        // Update the userInfo with the new image
+        // @ts-expect-error: userInfo may not have an image property
+        setUserInfo({ ...userInfo, image: null });
+        toast.success("Image removed successfully");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="bg-[#1b1c24] h-[100vh] flex items-center justify-center flex-col gap-10">
