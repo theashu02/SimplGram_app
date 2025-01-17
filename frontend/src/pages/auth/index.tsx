@@ -96,8 +96,12 @@ export default function Auth() {
               <h1 className="text-5xl font-bold md:text-6xl">Welcome</h1>
               <img src={Victory} alt="Victory Emoji" className="h-[100px]" />
             </div>
-            <p className="font-medium items-center justify-center w-full">
-              Fill the details to get started with the best chat application
+            <p className="flex font-medium items-center justify-center w-full poppins-medium">
+              <span className="text-purple-600 font-semibold text-2xl">
+                SimpL
+              </span>
+              <span className="text-gray-600 font-semibold text-3xl">G</span>
+              <span className="text-gray-800 font-semibold text-2xl">ram</span>
             </p>
             <div className="flex items-center justify-center w-full">
               <Tabs className="w-3/4" defaultValue="signup">

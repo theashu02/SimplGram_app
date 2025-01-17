@@ -1,8 +1,7 @@
-// import { response } from "express";
 import { compare } from "bcrypt";
 import User from "../models/UserModel.js";
 import jwt from "jsonwebtoken";
-import { response } from "express";
+import {renameSync, unlinkSync} from "fs";
 
 const maxAge = 3 * 24 * 60 * 60 * 1000;
 
@@ -97,6 +96,95 @@ export const getUserInfo = async (request, response, next) => {
       profileSetup: userData.profileSetup,
       color: userData.color,
     });
+  } catch (error) {
+    console.log({ error });
+    return response.status(500).send("Internal server Error: " + error.message);
+  }
+};
+export const updateProfile = async (request, response, next) => {
+  try {
+    const { userId } = request;
+    const { firstName, lastName, color } = request.body;
+    if (!firstName || !lastName) {
+      return response
+        .status(400)
+        .send("Firsname lastname and color is required");
+    }
+    const userData = await User.findByIdAndUpdate(
+      userId,
+      {
+        firstName,
+        lastName,
+        color,
+        profileSetup: true,
+      },
+      { new: true, runValidators: true }
+    );
+
+    return response.status(200).json({
+      id: userData.id,
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      image: userData.image,
+      profileSetup: userData.profileSetup,
+      color: userData.color,
+    });
+  } catch (error) {
+    console.log({ error });
+    return response.status(500).send("Internal server Error: " + error.message);
+  }
+};
+
+// this is not woring so connt this with cloudinary
+export const addProfileImage = async (request, response, next) => {
+  try {
+    if(!request.file){
+      return response.status(400).send("File is required.")
+    }
+    const date = Date.now();
+    let fileName = "uploads/profiles/" + date + request.file.originalname;
+    renameSync(request.file.path, fileName);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      request.userId,
+      { image: fileName },
+      { new: true, runValidators: true }
+    );
+
+    return response.status(200).json({
+      image: updatedUser.image,
+    });
+  } catch (error) {
+    console.log({ error });
+    return response.status(500).send("Internal server Error: " + error.message);
+  }
+};
+export const removeProfileImage = async (request, response, next) => {
+  try {
+    const { userId } = request;
+    const user = await User.findById(userId);
+
+    if(!user){
+      return response.status(404).send("User not found.");
+    }
+    if(user.image){
+      unlinkSync(user.image);
+    }
+    user.image = null;
+    await user.save();
+
+    return response.status(200).send("Profile image removed successfully.")
+  } catch (error) {
+    console.log({ error });
+    return response.status(500).send("Internal server Error: " + error.message);
+  }
+};
+
+export const logout = async (request, response, next) => {
+  try {
+    response.cookie("jwt", "", {maxAge: 1, secure: true, sameSite: "None"})
+    return response.status(200).send("Logout successfully.")
   } catch (error) {
     console.log({ error });
     return response.status(500).send("Internal server Error: " + error.message);

@@ -9,5 +9,5 @@ export const verifyToken = (request, response, next) => {
     request.userId = payload.userId;
     next();
   });
-  console.log({ token });
+  // console.log({ token });
 };

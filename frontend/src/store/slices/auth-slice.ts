@@ -6,6 +6,7 @@ interface UserInfo {
   lastName: string;
   color: number;
   email: string;
+  image: string;
   profileSetup: boolean;
 }
 
